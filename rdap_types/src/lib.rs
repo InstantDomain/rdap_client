@@ -869,6 +869,10 @@ pub struct FredNsset {
 pub struct Domain {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub handle: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ldh_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub unicode_name: Option<String>,
     pub entities: Vec<Entity>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub links: Option<Vec<Link>>,
