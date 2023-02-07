@@ -16,8 +16,6 @@ Async and fast RDAP client and parser.
 """
 exclude = [".travis.yml", "test_data/*"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 chrono = { version = "0.4.10", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
