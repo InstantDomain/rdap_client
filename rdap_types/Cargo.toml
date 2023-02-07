@@ -13,7 +13,7 @@ documentation = "https://docs.rs/rdap_client"
 description = """
 Async and fast RDAP client and parser.
 """
-exclude = [".travis.yml", "test_data/*"]
+exclude = ["test_data/*"]
 
 [dependencies]
 chrono = { version = "0.4.10", features = ["serde"] }
