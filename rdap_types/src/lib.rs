@@ -1,6 +1,5 @@
 use std::fmt::{self, Write};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-use std::slice::Iter;
 use std::str::FromStr;
 
 use chrono::{DateTime, FixedOffset, Offset, TimeZone, Utc};
@@ -370,9 +369,9 @@ pub struct Entity {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub links: Option<Vec<Link>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub events: Option<Events>,
+    pub events: Option<Vec<Event>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub as_event_actor: Option<Events>,
+    pub as_event_actor: Option<Vec<Event>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<Vec<Status>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -606,24 +605,6 @@ pub struct Event {
     pub links: Option<Link>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Events(pub Vec<Event>);
-
-impl Events {
-    pub fn action_date(&self, action: EventAction) -> Option<DateTime<FixedOffset>> {
-        self.0.iter().find(|p| p.action == action).map(|e| e.date)
-    }
-}
-
-impl<'a> IntoIterator for &'a Events {
-    type Item = &'a Event;
-    type IntoIter = Iter<'a, Event>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.0.iter()
-    }
-}
-
 /// https://tools.ietf.org/html/rfc7483#section-10.2.1 and https://www.iana.org/assignments/rdap-json-values/rdap-json-values.xhtml
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
 #[serde(remote = "NoticeOrRemarkType")]
@@ -729,7 +710,7 @@ pub struct IpNetwork {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub remarks: Option<Vec<NoticeOrRemark>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub events: Option<Events>,
+    pub events: Option<Vec<Event>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rdap_conformance: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -773,7 +754,7 @@ pub struct AutNum {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub remarks: Option<Vec<NoticeOrRemark>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub events: Option<Events>,
+    pub events: Option<Vec<Event>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rdap_conformance: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -827,7 +808,7 @@ pub struct DsData {
     digest: String,
     digest_type: u8,
     #[serde(skip_serializing_if = "Option::is_none")]
-    events: Option<Events>,
+    events: Option<Vec<Event>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     links: Option<Vec<Link>>,
 }
@@ -841,7 +822,7 @@ pub struct KeyData {
     public_key: String,
     algorithm: u8,
     #[serde(skip_serializing_if = "Option::is_none")]
-    events: Option<Events>,
+    events: Option<Vec<Event>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     links: Option<Vec<Link>>,
 }
@@ -899,7 +880,7 @@ pub struct Domain {
     pub secure_dns: Option<SecureDns>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub remarks: Option<Vec<NoticeOrRemark>>,
-    pub events: Events,
+    pub events: Vec<Event>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub network: Option<IpNetwork>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1213,7 +1194,7 @@ mod tests {
     fn test_parse_entity_15() {
         let parsed: Entity = deserialize_and_serialize("entity/entity_15.json");
         assert_eq!("XXXX", parsed.handle.as_ref().unwrap());
-        assert_eq!(1, parsed.as_event_actor.as_ref().unwrap().0.len());
+        assert_eq!(1, parsed.as_event_actor.as_ref().unwrap().len());
     }
 
     #[test]
