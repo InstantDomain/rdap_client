@@ -128,14 +128,14 @@ pub struct Link {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rel: Option<String>,
     pub href: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub hreflang: Option<Vec<String>>,
+    #[serde(rename = "hreflang", skip_serializing_if = "Option::is_none")]
+    pub href_lang: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub media: Option<String>,
-    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub typ: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
 }
 
 /// Value signifying the relationship an object would have with its closest containing object.
@@ -204,8 +204,7 @@ impl Serialize for Role {
 /// https://tools.ietf.org/html/rfc7483#section-4.8
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PublicId {
-    #[serde(rename = "type")]
-    pub typ: String,
+    pub r#type: String,
     pub identifier: String,
 }
 
@@ -597,11 +596,12 @@ impl Serialize for EventAction {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Event {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub event_actor: Option<String>,
-    pub event_action: EventAction,
-    #[serde(deserialize_with = "deserialize_datetime")]
-    pub event_date: DateTime<FixedOffset>,
+    #[serde(rename = "eventActor", skip_serializing_if = "Option::is_none")]
+    pub actor: Option<String>,
+    #[serde(rename = "eventAction")]
+    pub action: EventAction,
+    #[serde(rename = "eventDate", deserialize_with = "deserialize_datetime")]
+    pub date: DateTime<FixedOffset>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub links: Option<Link>,
 }
@@ -611,10 +611,7 @@ pub struct Events(pub Vec<Event>);
 
 impl Events {
     pub fn action_date(&self, action: EventAction) -> Option<DateTime<FixedOffset>> {
-        self.0
-            .iter()
-            .find(|p| p.event_action == action)
-            .map(|e| e.event_date)
+        self.0.iter().find(|p| p.action == action).map(|e| e.date)
     }
 }
 
@@ -683,8 +680,8 @@ impl Serialize for NoticeOrRemarkType {
 pub struct NoticeOrRemark {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
-    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub typ: Option<NoticeOrRemarkType>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<NoticeOrRemarkType>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -751,8 +748,8 @@ pub struct IpNetwork {
     pub country: Option<CountryCode>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_handle: Option<String>,
-    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub typ: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<Entity>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -776,7 +773,10 @@ pub struct IpNetwork {
     #[serde(rename = "cidr0_cidrs", skip_serializing_if = "Option::is_none")]
     pub cidr0_cidrs: Option<Vec<CidrOCidr>>,
     /// From 'arin_originas0' extension.
-    #[serde(rename = "arin_originas0_originautnums", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "arin_originas0_originautnums",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub arin_originas0_originautnums: Option<Vec<u32>>,
 }
 
@@ -793,8 +793,8 @@ pub struct AutNum {
     pub name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub country: Option<CountryCode>,
-    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub typ: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
     pub entities: Vec<Entity>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub links: Option<Vec<Link>>,
@@ -841,7 +841,8 @@ pub struct Variant {
     relation: Vec<DomainVariantRelation>,
     #[serde(skip_serializing_if = "Option::is_none")]
     idn_table: Option<String>,
-    variant_names: Vec<VariantName>,
+    #[serde(rename = "variantNames")]
+    names: Vec<VariantName>,
 }
 
 /// For field sizes see https://tools.ietf.org/html/rfc4034#section-5.1
@@ -1157,21 +1158,21 @@ mod tests {
     fn test_event_date_normal_format() {
         let json = r#"{"eventDate":"1990-12-31T23:59:59Z","eventAction":"last changed"}"#;
         let item: Event = serde_json::from_str(&json).unwrap();
-        assert_eq!(item.event_date.to_rfc3339(), "1990-12-31T23:59:59+00:00");
+        assert_eq!(item.date.to_rfc3339(), "1990-12-31T23:59:59+00:00");
     }
 
     #[test]
     fn test_event_date_normal_format_with_timezone() {
         let json = r#"{"eventDate":"2011-07-05T12:48:24-04:00","eventAction":"last changed"}"#;
         let item: Event = serde_json::from_str(&json).unwrap();
-        assert_eq!(item.event_date.to_rfc3339(), "2011-07-05T12:48:24-04:00");
+        assert_eq!(item.date.to_rfc3339(), "2011-07-05T12:48:24-04:00");
     }
 
     #[test]
     fn test_event_date_weird_format() {
         let json = r#"{"eventDate":"2019-09-20T11:45:06","eventAction":"last changed"}"#;
         let item: Event = serde_json::from_str(&json).unwrap();
-        assert_eq!(item.event_date.to_rfc3339(), "2019-09-20T11:45:06+00:00");
+        assert_eq!(item.date.to_rfc3339(), "2019-09-20T11:45:06+00:00");
     }
 
     // xn--rhqv96g domain registry format
@@ -1179,7 +1180,7 @@ mod tests {
     fn test_event_date_weird_format_vol2() {
         let json = r#"{"eventAction":"last changed","eventDate":"2016-04-13 08:18:43"}"#;
         let item: Event = serde_json::from_str(&json).unwrap();
-        assert_eq!(item.event_date.to_rfc3339(), "2016-04-13T08:18:43+00:00");
+        assert_eq!(item.date.to_rfc3339(), "2016-04-13T08:18:43+00:00");
     }
 
     // `mtr` domain registry format
@@ -1187,14 +1188,14 @@ mod tests {
     fn test_event_date_weird_format_vol3() {
         let json = r#"{"eventAction":"last changed","eventDate":"2015-08-25T00:00:00Z+0800"}"#;
         let item: Event = serde_json::from_str(&json).unwrap();
-        assert_eq!(item.event_date.to_rfc3339(), "2015-08-25T00:00:00+08:00");
+        assert_eq!(item.date.to_rfc3339(), "2015-08-25T00:00:00+08:00");
     }
 
     #[test]
     fn test_notices_or_remarks() {
         let notices_or_remarks = NoticesOrRemarks(vec![NoticeOrRemark {
             title: Some("Title".into()),
-            typ: None,
+            r#type: None,
             description: Some(vec!["Ahoj".into()]),
             links: None,
         }]);
