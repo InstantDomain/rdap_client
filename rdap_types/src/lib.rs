@@ -1,14 +1,13 @@
+use std::fmt::{self, Write};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+use std::slice::Iter;
+use std::str::FromStr;
+
 use chrono::{DateTime, FixedOffset, Offset, TimeZone, Utc};
 use serde::de::{IntoDeserializer, SeqAccess, Unexpected, Visitor};
 use serde::ser::SerializeSeq;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_with::skip_serializing_none;
-use std::convert::TryFrom;
-use std::fmt;
-use std::fmt::Write;
-use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-use std::slice::Iter;
-use std::str::FromStr;
 
 fn deserialize_string_lowercase<'de, D>(deserializer: D) -> Result<String, D::Error>
 where
