@@ -366,7 +366,7 @@ pub struct Entity {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub entities: Option<Vec<Entity>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub remarks: Option<NoticesOrRemarks>,
+    pub remarks: Option<Vec<NoticeOrRemark>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub links: Option<Vec<Link>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -522,9 +522,9 @@ pub struct Nameserver {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<Vec<Status>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub remarks: Option<NoticesOrRemarks>,
+    pub remarks: Option<Vec<NoticeOrRemark>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub notices: Option<NoticesOrRemarks>,
+    pub notices: Option<Vec<NoticeOrRemark>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub links: Option<Vec<Link>>,
     pub object_class_name: String,
@@ -688,34 +688,6 @@ pub struct NoticeOrRemark {
     pub links: Option<Vec<Link>>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct NoticesOrRemarks(Vec<NoticeOrRemark>);
-
-impl NoticesOrRemarks {
-    pub fn description_by_title(&self, title: &str) -> Option<&Vec<String>> {
-        for remark in self.0.iter().filter(|p| p.description.is_some()) {
-            if let Some(t) = &remark.title {
-                if title.eq_ignore_ascii_case(t.as_str()) {
-                    return remark.description.as_ref();
-                }
-            } else if title == "remarks" {
-                return remark.description.as_ref();
-            }
-        }
-
-        None
-    }
-}
-
-impl<'a> IntoIterator for &'a NoticesOrRemarks {
-    type Item = &'a NoticeOrRemark;
-    type IntoIter = Iter<'a, NoticeOrRemark>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.0.iter()
-    }
-}
-
 /// An enum signifying the IP protocol version of the network: "v4" signifies an IPv4 network,
 /// and "v6" signifies an IPv6 network.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
@@ -755,13 +727,13 @@ pub struct IpNetwork {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub links: Option<Vec<Link>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub remarks: Option<NoticesOrRemarks>,
+    pub remarks: Option<Vec<NoticeOrRemark>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub events: Option<Events>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rdap_conformance: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub notices: Option<NoticesOrRemarks>,
+    pub notices: Option<Vec<NoticeOrRemark>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub port43: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -799,13 +771,13 @@ pub struct AutNum {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub links: Option<Vec<Link>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub remarks: Option<NoticesOrRemarks>,
+    pub remarks: Option<Vec<NoticeOrRemark>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub events: Option<Events>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rdap_conformance: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub notices: Option<NoticesOrRemarks>,
+    pub notices: Option<Vec<NoticeOrRemark>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub port43: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -926,14 +898,14 @@ pub struct Domain {
     #[serde(rename = "secureDNS", skip_serializing_if = "Option::is_none")]
     pub secure_dns: Option<SecureDns>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub remarks: Option<NoticesOrRemarks>,
+    pub remarks: Option<Vec<NoticeOrRemark>>,
     pub events: Events,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub network: Option<IpNetwork>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rdap_conformance: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub notices: Option<NoticesOrRemarks>,
+    pub notices: Option<Vec<NoticeOrRemark>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub port43: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -955,7 +927,7 @@ pub struct Help {
     #[serde(skip_serializing_if = "Option::is_none")]
     rdap_conformance: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    notices: Option<NoticesOrRemarks>,
+    notices: Option<Vec<NoticeOrRemark>>,
 }
 
 // https://tools.ietf.org/html/rfc7483#section-8
@@ -965,7 +937,7 @@ pub struct EntitySearchResults {
     #[serde(skip_serializing_if = "Option::is_none")]
     rdap_conformance: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    notices: Option<NoticesOrRemarks>,
+    notices: Option<Vec<NoticeOrRemark>>,
     #[serde(rename = "entitySearchResults")]
     results: Vec<Entity>,
 }
@@ -976,7 +948,7 @@ pub struct DomainSearchResults {
     #[serde(skip_serializing_if = "Option::is_none")]
     rdap_conformance: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    notices: Option<NoticesOrRemarks>,
+    notices: Option<Vec<NoticeOrRemark>>,
     #[serde(rename = "domainSearchResults")]
     results: Vec<Entity>,
 }
@@ -987,7 +959,7 @@ pub struct NameserverSearchResults {
     #[serde(skip_serializing_if = "Option::is_none")]
     rdap_conformance: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    notices: Option<NoticesOrRemarks>,
+    notices: Option<Vec<NoticeOrRemark>>,
     #[serde(rename = "nameserverSearchResults")]
     results: Vec<Entity>,
 }
@@ -998,7 +970,7 @@ pub struct ArinOriginas0OriginautnumsResults {
     #[serde(skip_serializing_if = "Option::is_none")]
     rdap_conformance: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    notices: Option<NoticesOrRemarks>,
+    notices: Option<Vec<NoticeOrRemark>>,
     #[serde(rename = "arin_originas0_networkSearchResults")]
     results: Vec<IpNetwork>,
 }
@@ -1051,7 +1023,7 @@ pub struct Error {
     #[serde(skip_serializing_if = "Option::is_none")]
     rdap_conformance: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    notices: Option<NoticesOrRemarks>,
+    notices: Option<Vec<NoticeOrRemark>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     lang: Option<String>,
 }
@@ -1193,17 +1165,35 @@ mod tests {
 
     #[test]
     fn test_notices_or_remarks() {
-        let notices_or_remarks = NoticesOrRemarks(vec![NoticeOrRemark {
+        let notices_or_remarks = vec![NoticeOrRemark {
             title: Some("Title".into()),
             r#type: None,
             description: Some(vec!["Ahoj".into()]),
             links: None,
-        }]);
+        }];
+
         assert_eq!(
-            notices_or_remarks.description_by_title("title").unwrap()[0],
+            description_by_title("title", &notices_or_remarks).unwrap()[0],
             "Ahoj"
         );
-        assert!(notices_or_remarks.description_by_title("nothing").is_none());
+        assert!(description_by_title("nothing", &notices_or_remarks).is_none());
+    }
+
+    fn description_by_title<'a>(
+        title: &str,
+        notices: &'a [NoticeOrRemark],
+    ) -> Option<&'a Vec<String>> {
+        for remark in notices.iter().filter(|p| p.description.is_some()) {
+            if let Some(t) = &remark.title {
+                if title.eq_ignore_ascii_case(t.as_str()) {
+                    return remark.description.as_ref();
+                }
+            } else if title == "remarks" {
+                return remark.description.as_ref();
+            }
+        }
+
+        None
     }
 
     fn deserialize<T: DeserializeOwned>(path: &str) -> T {
