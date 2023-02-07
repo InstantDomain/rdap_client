@@ -1,7 +1,6 @@
 [package]
 name = "rdap_client"
 version = "0.3.0"
-authors = ["Jakub Onderka <jakub.onderka@gmail.cz>"]
 license = "BSD-2-Clause"
 keywords = ["rdap", "whois"]
 categories = ["network-programming", "parsing", "data-structures"]
