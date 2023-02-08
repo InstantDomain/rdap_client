@@ -903,9 +903,9 @@ pub struct Domain {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
     // fred extension
-    #[serde(rename = "fred_keyset", skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub fred_keyset: Option<FredKeyset>,
-    #[serde(rename = "fred_nsset", skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub fred_nsset: Option<FredNsset>,
 }
 
