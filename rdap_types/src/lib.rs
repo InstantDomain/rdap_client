@@ -144,7 +144,7 @@ pub struct Link {
 ///
 /// [RFC 7483]: https://tools.ietf.org/html/rfc7483#section-10.2.4
 /// [RDAP JSON Values]: https://www.iana.org/assignments/rdap-json-values/rdap-json-values.xhtml
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "lowercase", remote = "Role")]
 pub enum Role {
     /// The entity object instance is the registrant of the registration. In some registries, this is known as a maintainer.
@@ -169,12 +169,8 @@ pub enum Role {
     Notifications,
     /// The entity object instance handles communications related to a network operations center (NOC).
     Noc,
-    /// Non standard
-    Routing,
-    /// Non standard role used by ARIN registry.
-    Dns,
-    /// Non standard role used by RIPE NCC for reverse domain response. See [RIPE NCC RDAP Implementation](https://github.com/RIPE-NCC/whois/blob/master/README.RDAP.md#custom-zone-role-for-domain-objects).
-    Zone,
+    /// Value not defined in the RRC
+    Unknown(String),
 }
 
 impl<'de> Deserialize<'de> for Role {
@@ -182,14 +178,21 @@ impl<'de> Deserialize<'de> for Role {
     where
         D: Deserializer<'de>,
     {
-        let s = deserialize_string_lowercase(deserializer)?;
-
-        // Non standard for 'tirol' domain - https://rdap.ryce-rsp.com/rdap/
-        match s.as_str() {
-            "tech" => Ok(Self::Technical),
-            "admin" => Ok(Self::Administrative),
-            _ => Self::deserialize(s.into_deserializer()),
-        }
+        let s = String::deserialize(deserializer)?;
+        Ok(match s.as_str() {
+            "registrant" => Self::Registrant,
+            "technical" => Self::Technical,
+            "administrative" => Self::Administrative,
+            "abuse" => Self::Abuse,
+            "biilling" => Self::Billing,
+            "registrar" => Self::Registrar,
+            "reseller" => Self::Reseller,
+            "sponsor" => Self::Sponsor,
+            "proxy" => Self::Proxy,
+            "notifications" => Self::Notifications,
+            "noc" => Self::Noc,
+            _ => Self::Unknown(s),
+        })
     }
 }
 
