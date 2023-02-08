@@ -378,7 +378,17 @@ pub struct Entity {
     pub port43: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
-    pub object_class_name: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(tag = "objectClassName", rename_all = "lowercase")]
+pub enum Object {
+    AutNum(AutNum),
+    Domain(Domain),
+    Entity(Entity),
+    #[serde(rename = "ip network")]
+    IpNetwork(IpNetwork),
+    Nameserver(Nameserver),
 }
 
 /// https://tools.ietf.org/html/rfc7483#section-10.2.2
@@ -526,7 +536,6 @@ pub struct Nameserver {
     pub notices: Option<Vec<NoticeOrRemark>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub links: Option<Vec<Link>>,
-    pub object_class_name: String,
 }
 
 /// https://tools.ietf.org/html/rfc7483#section-10.2.3 and https://www.iana.org/assignments/rdap-json-values/rdap-json-values.xhtml
@@ -721,7 +730,6 @@ pub struct IpNetwork {
     pub status: Option<Vec<Status>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
-    pub object_class_name: String,
     // cidr0 extension
     #[serde(rename = "cidr0_cidrs", skip_serializing_if = "Option::is_none")]
     pub cidr0_cidrs: Option<Vec<CidrOCidr>>,
@@ -765,7 +773,6 @@ pub struct AutNum {
     pub status: Option<Vec<Status>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
-    pub object_class_name: String,
 }
 
 /// https://tools.ietf.org/html/rfc7483#section-10.2.5
@@ -848,7 +855,6 @@ pub struct SecureDns {
 pub struct FredKeyset {
     pub links: Vec<Link>,
     pub handle: String,
-    pub object_class_name: String,
     #[serde(rename = "dns_keys")]
     pub dns_keys: Vec<KeyData>,
 }
@@ -859,7 +865,6 @@ pub struct FredKeyset {
 pub struct FredNsset {
     pub links: Vec<Link>,
     pub handle: String,
-    pub object_class_name: String,
     pub nameservers: Vec<Nameserver>,
 }
 
@@ -897,7 +902,6 @@ pub struct Domain {
     pub status: Option<Vec<Status>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
-    pub object_class_name: String,
     // fred extension
     #[serde(rename = "fred_keyset", skip_serializing_if = "Option::is_none")]
     pub fred_keyset: Option<FredKeyset>,
@@ -1203,148 +1207,193 @@ mod tests {
 
     #[test]
     fn test_parse_entity_17() {
-        let parsed: Entity = deserialize_and_serialize("entity/entity_17.json");
+        let Object::Entity(parsed) = deserialize_and_serialize("entity/entity_17.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("XXXX", parsed.handle.as_ref().unwrap());
     }
 
     #[test]
     fn test_parse_entity_fred() {
-        let parsed: Entity = deserialize_and_serialize("entity/entity_fred.json");
+        let Object::Entity(parsed) = deserialize_and_serialize("entity/entity_fred.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("CZ-NIC", parsed.handle.as_ref().unwrap());
     }
 
     #[test]
     fn test_parse_entity_ripe() {
-        let parsed: Entity = deserialize_and_serialize("entity/entity_ripe.json");
+        let Object::Entity(parsed) = deserialize_and_serialize("entity/entity_ripe.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("ORG-RIEN1-RIPE", parsed.handle.as_ref().unwrap());
     }
 
     #[test]
     fn test_parse_nameserver_18() {
-        let parsed: Nameserver = deserialize_and_serialize("nameserver/nameserver_18.json");
+        let Object::Nameserver(parsed) = deserialize_and_serialize("nameserver/nameserver_18.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("XXXX", parsed.handle.unwrap());
     }
 
     #[test]
     fn test_parse_nameserver_19() {
-        let parsed: Nameserver = deserialize_and_serialize("nameserver/nameserver_19.json");
+        let Object::Nameserver(parsed) = deserialize_and_serialize("nameserver/nameserver_19.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("ns1.example.com", parsed.ldh_name);
     }
 
     #[test]
     fn test_parse_nameserver_20() {
-        let parsed: Nameserver = deserialize_and_serialize("nameserver/nameserver_20.json");
+        let Object::Nameserver(parsed) = deserialize_and_serialize("nameserver/nameserver_20.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("ns1.example.com", parsed.ldh_name);
     }
 
     #[test]
     fn test_parse_nameserver_fred() {
-        let parsed: Nameserver = deserialize_and_serialize("nameserver/nameserver_fred.json");
+        let Object::Nameserver(parsed) = deserialize_and_serialize("nameserver/nameserver_fred.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("a.ns.nic.cz", parsed.ldh_name);
     }
 
     #[test]
     fn test_parse_domain_23() {
-        let parsed: Domain = deserialize_and_serialize("domain/domain_23.json");
+        let Object::Domain(parsed) = deserialize_and_serialize("domain/domain_23.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("XXXX", parsed.handle.unwrap());
     }
 
     #[test]
     fn test_parse_domain_24() {
-        let parsed: Domain = deserialize_and_serialize("domain/domain_24.json");
+        let Object::Domain(parsed) = deserialize_and_serialize("domain/domain_24.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("XXXX", parsed.handle.unwrap());
     }
 
     #[test]
     fn test_parse_domain_fred() {
-        let parsed: Domain = deserialize_and_serialize("domain/domain_fred.json");
+        let Object::Domain(parsed) = deserialize_and_serialize("domain/domain_fred.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("nic.cz", parsed.handle.unwrap());
     }
 
     #[test]
     fn test_parse_domain_ripe_reverse() {
-        let parsed: Domain = deserialize_and_serialize("domain/domain_ripe_reverse.json");
+        let Object::Domain(parsed) = deserialize_and_serialize("domain/domain_ripe_reverse.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("6.0.193.in-addr.arpa", parsed.handle.unwrap());
     }
 
     #[test]
     fn test_parse_ip_network_26() {
-        let parsed: IpNetwork = deserialize_and_serialize("ip_network/ip_network_26.json");
+        let Object::IpNetwork(parsed) = deserialize_and_serialize("ip_network/ip_network_26.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("XXXX-RIR", parsed.handle);
     }
 
     #[test]
     fn test_parse_ip_network_apnic_1_1_1_1() {
-        let parsed: IpNetwork =
-            deserialize_and_serialize("ip_network/ip_network_apnic_1_1_1_1.json");
+        let Object::IpNetwork(parsed) = deserialize_and_serialize("ip_network/ip_network_apnic_1_1_1_1.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("1.1.1.0 - 1.1.1.255", parsed.handle);
     }
 
     #[test]
     fn test_parse_ip_network_arin_3_3_3_3() {
-        let parsed: IpNetwork =
-            deserialize_and_serialize("ip_network/ip_network_arin_3_3_3_3.json");
+        let Object::IpNetwork(parsed) = deserialize_and_serialize("ip_network/ip_network_arin_3_3_3_3.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("NET-3-0-0-0-1", parsed.handle);
     }
 
     #[test]
     fn test_parse_ip_network_ripe_193_0_0_0() {
-        let parsed: IpNetwork =
-            deserialize_and_serialize("ip_network/ip_network_ripe_193_0_0_0.json");
+        let Object::IpNetwork(parsed) = deserialize_and_serialize("ip_network/ip_network_ripe_193_0_0_0.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("193.0.0.0 - 193.0.7.255", parsed.handle);
     }
 
     #[test]
     fn test_parse_ip_network_afrinic() {
-        let parsed: IpNetwork = deserialize_and_serialize("ip_network/ip_network_afrinic.json");
+        let Object::IpNetwork(parsed) = deserialize_and_serialize("ip_network/ip_network_afrinic.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("41.0.0.0 - 41.0.255.255", parsed.handle);
     }
 
     #[test]
     fn test_parse_ip_network_br() {
-        let parsed: IpNetwork = deserialize_and_serialize("ip_network/ip_network_br.json");
+        let Object::IpNetwork(parsed) = deserialize_and_serialize("ip_network/ip_network_br.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("177.0.0.0/14", parsed.handle);
     }
 
     #[test]
     fn test_parse_ip_network_lacnic() {
-        let parsed: IpNetwork = deserialize_and_serialize("ip_network/ip_network_lacnic.json");
+        let Object::IpNetwork(parsed) = deserialize_and_serialize("ip_network/ip_network_lacnic.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("179.0.0.0/23", parsed.handle);
     }
 
     #[test]
     fn test_parse_autnum_27() {
-        let parsed: AutNum = deserialize_and_serialize("autnum/autnum_27.json");
+        let Object::AutNum(parsed) = deserialize_and_serialize("autnum/autnum_27.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("XXXX-RIR", parsed.handle);
     }
 
     #[test]
     fn test_parse_autnum_ripe_as1234() {
-        let parsed: AutNum = deserialize_and_serialize("autnum/autnum_ripe_as1234.json");
+        let Object::AutNum(parsed) = deserialize_and_serialize("autnum/autnum_ripe_as1234.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("AS1234", parsed.handle);
     }
 
     #[test]
     fn test_parse_autnum_arin_as256() {
-        let parsed: AutNum = deserialize_and_serialize("autnum/autnum_arin_as256.json");
+        let Object::AutNum(parsed) = deserialize_and_serialize("autnum/autnum_arin_as256.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("AS256", parsed.handle);
     }
 
     #[test]
     fn test_parse_autnum_afrinic_as36864() {
-        let parsed: AutNum = deserialize_and_serialize("autnum/autnum_afrinic_as36864.json");
+        let Object::AutNum(parsed) = deserialize_and_serialize("autnum/autnum_afrinic_as36864.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("AS36864", parsed.handle);
     }
 
     #[test]
     fn test_parse_autnum_apnic_as4608() {
-        let parsed: AutNum = deserialize_and_serialize("autnum/autnum_apnic_as4608.json");
+        let Object::AutNum(parsed) = deserialize_and_serialize("autnum/autnum_apnic_as4608.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("AS4608", parsed.handle);
     }
 
     #[test]
     fn test_parse_autnum_lacnic_as27648() {
-        let parsed: AutNum = deserialize_and_serialize("autnum/autnum_lacnic_as27648.json");
+        let Object::AutNum(parsed) = deserialize_and_serialize("autnum/autnum_lacnic_as27648.json") else {
+            panic!("invalid object class");
+        };
         assert_eq!("27648", parsed.handle);
     }
 
