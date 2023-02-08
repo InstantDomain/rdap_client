@@ -122,8 +122,10 @@ impl<'de> Deserialize<'de> for CountryCode {
 /// https://tools.ietf.org/html/rfc7483#section-4.2
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Link {
+    /// This is optional in RFC 7483, but became mandatory in 9083.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub value: Option<String>,
+    /// This is optional in RFC 7483, but became mandatory in 9083.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rel: Option<String>,
     pub href: String,
