@@ -368,7 +368,7 @@ pub struct Entity {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub public_ids: Option<Vec<PublicId>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub entities: Option<Vec<Entity>>,
+    pub entities: Option<Vec<Object>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub remarks: Option<Vec<NoticeOrRemark>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -389,8 +389,10 @@ pub struct Entity {
 #[serde(tag = "objectClassName", rename_all = "lowercase")]
 pub enum Object {
     AutNum(AutNum),
-    Domain(Domain),
+    Domain(Box<Domain>),
     Entity(Entity),
+    FredKeyset(FredKeyset),
+    FredNsset(FredNsset),
     #[serde(rename = "ip network")]
     IpNetwork(IpNetwork),
     Nameserver(Nameserver),
@@ -532,7 +534,7 @@ pub struct Nameserver {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ip_addresses: Option<IpAddresses>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub entities: Option<Vec<Entity>>,
+    pub entities: Option<Vec<Object>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<Vec<Status>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -718,7 +720,7 @@ pub struct IpNetwork {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub entities: Option<Vec<Entity>>,
+    pub entities: Option<Vec<Object>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub links: Option<Vec<Link>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -761,7 +763,7 @@ pub struct AutNum {
     pub country: Option<CountryCode>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub r#type: Option<String>,
-    pub entities: Vec<Entity>,
+    pub entities: Vec<Object>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub links: Option<Vec<Link>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -883,20 +885,20 @@ pub struct Domain {
     pub ldh_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub unicode_name: Option<String>,
-    pub entities: Vec<Entity>,
+    pub entities: Vec<Object>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub links: Option<Vec<Link>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub variants: Option<Vec<Variant>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub nameservers: Option<Vec<Nameserver>>,
+    pub nameservers: Option<Vec<Object>>,
     #[serde(rename = "secureDNS", skip_serializing_if = "Option::is_none")]
     pub secure_dns: Option<SecureDns>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub remarks: Option<Vec<NoticeOrRemark>>,
     pub events: Vec<Event>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub network: Option<IpNetwork>,
+    pub network: Option<Object>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rdap_conformance: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -909,9 +911,9 @@ pub struct Domain {
     pub lang: Option<String>,
     // fred extension
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub fred_keyset: Option<FredKeyset>,
+    pub fred_keyset: Option<Object>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub fred_nsset: Option<FredNsset>,
+    pub fred_nsset: Option<Object>,
 }
 
 /// https://tools.ietf.org/html/rfc7483.html#section-7
