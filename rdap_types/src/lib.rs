@@ -391,8 +391,8 @@ pub enum Object {
     AutNum(AutNum),
     Domain(Box<Domain>),
     Entity(Entity),
-    FredKeyset(FredKeyset),
-    FredNsset(FredNsset),
+    FredKeySet(FredKeySet),
+    FredNsSet(FredNsSet),
     #[serde(rename = "ip network")]
     IpNetwork(IpNetwork),
     Nameserver(Nameserver),
@@ -859,7 +859,7 @@ pub struct SecureDns {
 /// https://fred.nic.cz/rdap-extension/
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct FredKeyset {
+pub struct FredKeySet {
     pub links: Vec<Link>,
     pub handle: String,
     #[serde(rename = "dns_keys")]
@@ -869,7 +869,7 @@ pub struct FredKeyset {
 /// https://fred.nic.cz/rdap-extension/
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct FredNsset {
+pub struct FredNsSet {
     pub links: Vec<Link>,
     pub handle: String,
     pub nameservers: Vec<Nameserver>,
